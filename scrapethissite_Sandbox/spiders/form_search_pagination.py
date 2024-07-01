@@ -6,11 +6,11 @@ class FormSearchPaginationSpider(scrapy.Spider):
     start_urls = ["https://www.scrapethissite.com/pages/forms/"]
 
 
+    #for scraping each individual item/row from table in a single page 
+    #follows the url to the next page
     def parse(self, response):
         team = teamStats()
 
-        #left to handle none cases for each xpath selector
-    
         for item in response.xpath('//tr'):
             if item.xpath('td').get() is not None:
                 team['name'] = item.xpath('td[@class="name"]/text()').get().strip()
@@ -30,8 +30,14 @@ class FormSearchPaginationSpider(scrapy.Spider):
                     team['goal_diff'] = item.xpath('td[@class="diff text-success"]/text()').get().strip()
                 else: 
                     team['goal_diff'] = item.xpath('td[@class="diff text-danger"]/text()').get().strip()
-                
+
                 yield team
+
+        #follows the next page to continue scraping data there too 
+        for next in response.xpath('//ul[@class="pagination"]'):
+            next_page = next.xpath('li/a/@href').getall()
+            for next in next_page:
+                yield response.follow(next, callback = self.parse)
 
 
 
