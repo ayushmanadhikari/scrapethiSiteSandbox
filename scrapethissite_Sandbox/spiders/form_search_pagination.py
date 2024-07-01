@@ -36,7 +36,7 @@ class FormSearchPaginationSpider(scrapy.Spider):
         #follows the next page to continue scraping data there too 
         for next in response.xpath('//ul[@class="pagination"]'):
             next_page = next.xpath('li/a/@href').getall()
-            for next in next_page:
+            for next in next_page[:len(next_page)-1]:
                 yield response.follow(next, callback = self.parse)
 
 
